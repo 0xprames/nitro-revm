@@ -1,8 +1,10 @@
 use alloy_primitives::{Address, U256};
 use revm::{
-    primitives::{AccountInfo, TxEnv},
+    primitives::{AccountInfo, TxEnv, bits::B160},
     InMemoryDB, EVM,
 };
+
+use std::str::FromStr;
 
 use std::{io::Read, net::TcpListener};
 
@@ -38,7 +40,7 @@ fn main() -> eyre::Result<()> {
 
 fn simulate(payload: Payload) -> eyre::Result<()> {
     let mut db = InMemoryDB::default();
-    let receiver = payload.sender;
+    let receiver = B160::from_str(&payload.sender.to_string())?;
     let value = payload.amount;
 
     let balance = U256::from(111);

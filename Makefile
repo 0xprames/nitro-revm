@@ -10,11 +10,11 @@ build:
 	rustup target install x86_64-unknown-linux-musl
 	sudo yum install -y openssl-devel protobuf-compiler cmake clang
 	cargo build --manifest-path=${RUST_DIR}/Cargo.toml --target=x86_64-unknown-linux-musl --release --verbose
-	cp ${RUST_DIR}/target/${ARCH}-unknown-linux-musl/release/vsock-sample ${RUST_DIR}
+	cp ${RUST_DIR}/target/x86_64-unknown-linux-musl/release/nitro-revm ${RUST_DIR}
 
 server: build
-	docker build -t vsock-sample-server -f Dockerfile.server .
-	nitro-cli build-enclave --docker-uri vsock-sample-server --output-file vsock_sample_server.eif
+	docker build -t nitro-revm-server -f Dockerfile.server .
+	nitro-cli build-enclave --docker-uri nitro-revm-server --output-file nitro-revm-server.eif
 
 client: build
 	docker build -t vsock-sample-client -f Dockerfile.client .

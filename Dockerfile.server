@@ -1,0 +1,3 @@
+FROM alpine:latest
+COPY nitro-revm .
+CMD ["./nitro-revm"]
