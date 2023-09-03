@@ -5,13 +5,13 @@ pub mod utils;
 use command_parser::{ClientArgs, ServerArgs};
 use protocol_helpers::{recv_loop, recv_u64, send_loop, send_u64};
 
+use super::{simulate, Payload};
 use nix::sys::socket::listen as listen_vsock;
 use nix::sys::socket::{accept, bind, connect, shutdown, socket};
 use nix::sys::socket::{AddressFamily, Shutdown, SockAddr, SockFlag, SockType};
 use nix::unistd::close;
 use std::convert::TryInto;
 use std::os::unix::io::{AsRawFd, RawFd};
-use super::{simulate, Payload};
 
 const VMADDR_CID_ANY: u32 = 0xFFFFFFFF;
 const BUF_MAX_LEN: usize = 8192;
@@ -95,21 +95,31 @@ pub fn server(args: ServerArgs) {
         SockType::Stream,
         SockFlag::empty(),
         None,
-    ).unwrap();
+    )
+    .unwrap();
 
     let sockaddr = SockAddr::new_vsock(VMADDR_CID_ANY, args.port);
 
-    bind(socket_fd, &sockaddr).map_err(|err| format!("Bind failed: {:?}", err)).unwrap();
+    bind(socket_fd, &sockaddr)
+        .map_err(|err| format!("Bind failed: {:?}", err))
+        .unwrap();
 
-    listen_vsock(socket_fd, BACKLOG).map_err(|err| format!("Listen failed: {:?}", err)).unwrap();
+    listen_vsock(socket_fd, BACKLOG)
+        .map_err(|err| format!("Listen failed: {:?}", err))
+        .unwrap();
 
     loop {
-        let fd = accept(socket_fd).map_err(|err| format!("Accept failed: {:?}", err)).unwrap();
+        let fd = accept(socket_fd)
+            .map_err(|err| format!("Accept failed: {:?}", err))
+            .unwrap();
         // TODO: Replace this with your server code
         let len = recv_u64(fd).unwrap();
         let mut buf = [0u8; BUF_MAX_LEN];
         recv_loop(fd, &mut buf, len).unwrap();
-        let data: Payload = serde_json::from_slice(&buf).unwrap();
+        println!("buffer is {:#?}", buf);
+        let data_str = String::from_utf8(buf.to_vec()).unwrap();
+        let data: Payload = serde_json::from_str(&data_str.trim_matches(char::from(0))).unwrap();
+        println!("recieved: {:#?}", data);
         simulate(data).unwrap();
     }
 }

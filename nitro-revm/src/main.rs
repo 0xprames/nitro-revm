@@ -1,9 +1,8 @@
 use alloy_primitives::{Address, U256};
 use revm::{
-    primitives::{AccountInfo, TxEnv, bits::B160},
+    primitives::{bits::B160, AccountInfo, TxEnv},
     InMemoryDB, EVM,
 };
-
 
 use std::str::FromStr;
 
@@ -11,9 +10,9 @@ use std::{io::Read, net::TcpListener};
 
 mod server;
 mod vsock_utils;
-use vsock_utils::server as vsock_server;
+use server::get_key_and_cert;
 use vsock_utils::command_parser::ServerArgs;
-use server::{get_key_and_cert, serve};
+use vsock_utils::server as vsock_server;
 
 // This payload should be generalized to include all the pre-state for each
 // simulation.
@@ -26,18 +25,9 @@ pub struct Payload {
 fn main() -> eyre::Result<()> {
     let (mut key, mut cert) = get_key_and_cert();
     // dbg!(&cert);
-    let _ = vsock_server(ServerArgs{port: 7878});
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
-    for stream in listener.incoming() {
-        let mut stream = stream.unwrap();
-        let mut buf = vec![];
-        let _num_bytes = stream.read_to_end(&mut buf)?;
-        let data: Payload = serde_json::from_slice(&buf)?;
-        simulate(data)?;
-
-        // TODO: Re-enable this,
-        // let _ = serve(stream, &mut key, &mut cert).unwrap();
-    }
+    let _ = vsock_server(ServerArgs { port: 7878 });
+    // TODO: Re-enable this,
+    // let _ = serve(stream, &mut key, &mut cert).unwrap();
 
     Ok(())
 }

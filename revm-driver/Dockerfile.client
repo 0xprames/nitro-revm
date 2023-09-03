@@ -1,0 +1,3 @@
+FROM alpine:latest
+COPY revm_driver .
+CMD ["./revm_driver", "client", "--cid", "3",  "--port", "5005"]
