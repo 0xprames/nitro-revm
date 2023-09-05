@@ -1,6 +1,6 @@
 RUST_DIR := $(shell readlink -m $(shell dirname $(firstword $(MAKEFILE_LIST))))
 PWD = $(shell pwd)
-export TARGET_CC=${PWD}/x86_64-linux-musl-native/bin/x86_64-linux-musl-gcc
+export TARGET_CC=${PWD}/vendor/x86_64-linux-musl-native/bin/x86_64-linux-musl-gcc
 export TARGET_CMAKE_TOOLCHAIN_FILE=${PWD}/nitro-revm.cmake
 
 build:
