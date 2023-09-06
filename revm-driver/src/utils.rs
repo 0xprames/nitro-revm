@@ -39,6 +39,13 @@ macro_rules! create_app {
                             .help("cid")
                             .takes_value(true)
                             .required(true),
+                    )
+                    .arg(
+                        Arg::with_name("key_id")
+                            .long("key_id")
+                            .help("key_id")
+                            .takes_value(true)
+                            .required(true),
                     ),
             )
     };

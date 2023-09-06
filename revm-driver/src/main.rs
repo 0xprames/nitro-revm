@@ -12,15 +12,15 @@ pub struct Payload {
     sender: Address,
     amount: U256,
 }
-
-fn main() {
+#[tokio::main]
+async fn main() {
     let app = create_app!();
     let args = app.get_matches();
 
     match args.subcommand() {
         Some(("client", args)) => {
             let client_args = ClientArgs::new_with(args).unwrap();
-            client(client_args).unwrap();
+            client(client_args).await.unwrap();
         }
         Some(_) | None => (),
     }

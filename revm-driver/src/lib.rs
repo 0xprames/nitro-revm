@@ -1,9 +1,11 @@
 pub mod command_parser;
+pub mod encryption_helper;
 pub mod protocol_helpers;
 pub mod utils;
 
 use alloy_primitives::{Address, U256};
 use command_parser::ClientArgs;
+use encryption_helper::{get_kms_client, EncryptionHelper};
 use protocol_helpers::{send_loop, send_u64};
 
 use nix::sys::socket::{connect, shutdown, socket};
@@ -72,7 +74,7 @@ fn vsock_connect(cid: u32, port: u32) -> Result<VsockSocket, String> {
     Err(err_msg)
 }
 
-pub fn client(args: ClientArgs) -> Result<(), String> {
+pub async fn client(args: ClientArgs) -> Result<(), String> {
     let vsocket = vsock_connect(args.cid, args.port)?;
     let fd = vsocket.as_raw_fd();
 
@@ -83,6 +85,13 @@ pub fn client(args: ClientArgs) -> Result<(), String> {
     };
     let data = serde_json::to_string(&data).unwrap();
     let buf = data.as_bytes();
+    // encrypt data
+    let client = get_kms_client().await.unwrap();
+    let encryption_payload = EncryptionHelper::new(client, args.key_id)
+        .encrypt_data(buf)
+        .await;
+
+    println!("encryption_payload: {:#?}", encryption_payload);
     let len: u64 = buf.len().try_into().map_err(|err| format!("{:?}", err))?;
     send_u64(fd, len)?;
     send_loop(fd, buf, len)?;

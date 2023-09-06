@@ -2,7 +2,8 @@ RUST_DIR := $(shell readlink -m $(shell dirname $(firstword $(MAKEFILE_LIST))))
 PWD = $(shell pwd)
 export TARGET_CC=${PWD}/vendor/x86_64-linux-musl-native/bin/x86_64-linux-musl-gcc
 export TARGET_CMAKE_TOOLCHAIN_FILE=${PWD}/nitro-revm.cmake
-
+export CC=${PWD}/vendor/x86_64-linux-musl-native/bin/x86_64-linux-musl-gcc
+export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER = ${PWD}/vendor/x86_64-linux-musl-native/bin/ld
 build:
 	curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh -s -- -y
 	# yeah - this next line + sudo in make is dumb lmao, will revisit this
